@@ -54,3 +54,11 @@ export function theta(vector) {
     return vector.y > 0 ? Math.PI / 2 : -1 * Math.PI / 2;
   }
 }
+
+export function snapAngle(vector, { snapInterval = Math.PI / 2, snapOrigin = 0 } = {}) {
+  if (!snapInterval) return vector;
+  const angle = theta(vector);
+  const units = Math.round(angle / snapInterval);
+  const snappedAngle = units * snapInterval;
+  return rotate(vector, -1 * (snappedAngle - angle));
+}

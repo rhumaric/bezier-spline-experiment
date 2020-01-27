@@ -7,7 +7,7 @@ Experiment for drawing a spline made of cubic bezier curves that goes through a 
 
 ## TODO
 - First and last point control points
-- Add snapping to nearest angle (configurable, through angle and origin)
+- ~~Add snapping to nearest angle (configurable, through angle and origin)~~
 - Add flipping of bisecting vector/angle for really obtuse angles
 - Add/delete points
 - Haptic/auditory feedback of spline position?

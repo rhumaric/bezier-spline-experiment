@@ -9,7 +9,8 @@
     theta,
     crossZ,
     rotate,
-    dot
+    dot,
+    snapAngle
   } from "../lib/vectors";
 
   function straightLines(coordinates) {
@@ -95,6 +96,8 @@
       const bc = substract(coordinates[i + 1], coordinates[i]);
       const ac = substract(coordinates[i + 1], coordinates[i - 1]);
       const bisectingVector = normalize(bisect(ba, bc));
+      // Let's snap it to the nearest 90deg
+
       // Computing the z value of the cross product between
       // ac and the bisecting vector. It's sign represents
       // in which direction to rotate for getting the tangent
@@ -113,8 +116,8 @@
 
       // Now we have the direction we need the amplitude
       // for that we can project ba and bc onto the vector
-      const tangentba = multiply(tangent, dot(ba, tangent) * 0.5);
-      const tangentbc = multiply(tangent, dot(bc, tangent) * 0.5);
+      const tangentba = snapAngle(multiply(tangent, dot(ba, tangent) * 0.5));
+      const tangentbc = snapAngle(multiply(tangent, dot(bc, tangent) * 0.5));
       const controlPointBa = add(tangentba, coordinates[i]);
       const controlPointBc = add(tangentbc, coordinates[i]);
       commands.push(`${controlPointBa.x},${controlPointBa.y}`);
