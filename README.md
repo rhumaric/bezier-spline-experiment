@@ -3,6 +3,8 @@ Bezier spline experiment
 
 Experiment for drawing a spline made of cubic bezier curves that goes through a given set of points.
 
+[Demo](public)
+
 ## TODO
 - First and last point control points
 - Add snapping to nearest angle (configurable, through angle and origin)
