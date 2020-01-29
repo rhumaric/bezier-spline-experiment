@@ -3,8 +3,10 @@
   import Path, {
     bisectingVector,
     bezierTangents,
-    bezierCurve
+    bezierCurve,
+    snappedTangents
   } from "./Path.svelte";
+  import toBezier from "../lib/toBezier";
 
   let width = window.innerWidth,
     height = window.innerHeight;
@@ -16,6 +18,7 @@
     { x: (80 / 100) * width, y: (80 / 100) * height },
     { x: (90 / 100) * width, y: (80 / 100) * height }
   ];
+  $: bezierData = toBezier(coordinates);
 
   function handleChange(i) {
     return function(event) {
@@ -53,9 +56,19 @@
   {#if width && height}
     <svg {width} {height} viewBox="0 0 {width} {height}">
       <Path {coordinates} strokeDasharray="8 4" />
-      <Path {coordinates} d={bisectingVector} strokeDasharray={'8 4 2 4'} />
-      <Path {coordinates} d={bezierTangents} strokeDasharray={'16 4 2 4'} />
-      <Path {coordinates} d={bezierCurve} opacity="1" />
+      <Path
+        coordinates={bezierData}
+        d={bisectingVector}
+        strokeDasharray={'8 4 2 4'} />
+      <Path
+        coordinates={bezierData}
+        d={bezierTangents}
+        strokeDasharray={'16 4 2 4'} />
+      <Path
+        coordinates={bezierData}
+        d={snappedTangents}
+        strokeDasharray={'16 4 8 4 2 4'} />
+      <Path coordinates={bezierData} d={bezierCurve} opacity="1" />
       {#each coordinates as coordinate, i (i)}
         <Vertex
           coordinates={coordinate}

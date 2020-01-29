@@ -6,7 +6,7 @@ export function add({ x, y }, { x: x2, y: y2 }) {
   return { x: x + x2, y: y + y2 };
 }
 
-export function substract({ x, y }, { x: x2, y: y2 }) {
+export function subtract({ x, y }, { x: x2, y: y2 }) {
   return { x: x - x2, y: y - y2 };
 }
 

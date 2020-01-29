@@ -1,7 +1,7 @@
 <script context="module">
   import {
     add,
-    substract,
+    subtract,
     bisect,
     multiply,
     normalize,
@@ -26,115 +26,81 @@
 
   export function bisectingVector(coordinates) {
     const commands = [];
-    for (let i = 1; i < coordinates.length - 1; i++) {
-      const a = substract(coordinates[i - 1], coordinates[i]);
-      const b = substract(coordinates[i + 1], coordinates[i]);
-      const normAverage = (norm(a) + norm(b)) / 3;
-      const bisecting = multiply(bisect(a, b), normAverage);
-      commands.push("M");
-      commands.push(`${coordinates[i].x},${coordinates[i].y}`);
-      // lowercase to use coordinates as relative from the last point
-      commands.push("l");
-      commands.push(`${bisecting.x},${bisecting.y}`);
+    for (let i = 0; i < coordinates.length; i++) {
+      const { ba, bc, bisectingVector, x, y } = coordinates[i];
+      if (bisectingVector) {
+        const normAverage = (norm(ba) + norm(bc)) / 3;
+        const bisecting = multiply(bisectingVector, normAverage);
+        commands.push("M");
+        commands.push(`${x},${y}`);
+        // lowercase to use coordinates as relative from the last point
+        commands.push("l");
+        commands.push(`${bisecting.x},${bisecting.y}`);
+      }
     }
     return commands.join(" ");
   }
 
   export function bezierTangents(coordinates) {
     const commands = [];
-    for (let i = 1; i < coordinates.length - 1; i++) {
-      const ba = substract(coordinates[i - 1], coordinates[i]);
-      const bc = substract(coordinates[i + 1], coordinates[i]);
-      const ac = substract(coordinates[i + 1], coordinates[i - 1]);
-      const bisectingVector = normalize(bisect(ba, bc));
-      // Computing the z value of the cross product between
-      // ac and the bisecting vector. It's sign represents
-      // in which direction to rotate for getting the tangent
-      const z = crossZ(ac, bisectingVector);
-      let tangent;
-      if (z > 0) {
-        tangent = rotate(bisectingVector, Math.PI / 2);
-      } else if (z < 0) {
-        tangent = rotate(bisectingVector, -Math.PI / 2);
-      } else {
-        // This means AC and the bisecting vector are parallel,
-        // so the angle between ba and bc is null, picking +90deg arbitrarily
-        // TODO: Maybe account for earlier points?
-        tangent = rotate(bisectingVector, Math.PI / 2);
+    for (let i = 0; i < coordinates.length; i++) {
+      const { tangentBa, tangentBc, x, y } = coordinates[i];
+      if (tangentBa) {
+        commands.push("M");
+        commands.push(`${x},${y}`);
+        // lowercase to use coordinates as relative from the last point
+        commands.push("l");
+        commands.push(`${tangentBa.x},${tangentBa.y}`);
       }
 
-      // Now we have the direction we need the amplitude
-      // for that we can project ba and bc onto the vector
-      const tangentba = multiply(tangent, dot(ba, tangent) * 0.5);
-      const tangentbc = multiply(tangent, dot(bc, tangent) * 0.5);
+      if (tangentBc) {
+        commands.push("M");
+        commands.push(`${x},${y}`);
+        commands.push("l");
+        commands.push(`${tangentBc.x},${tangentBc.y}`);
+      }
+    }
+    return commands.join(" ");
+  }
 
-      commands.push("M");
-      commands.push(`${coordinates[i].x},${coordinates[i].y}`);
-      // lowercase to use coordinates as relative from the last point
-      commands.push("l");
-      commands.push(`${tangentba.x},${tangentba.y}`);
+  export function snappedTangents(coordinates) {
+    const commands = [];
+    for (let i = 0; i < coordinates.length; i++) {
+      const { snappedTangentBa, snappedTangentBc, x, y } = coordinates[i];
+      if (snappedTangentBa) {
+        commands.push("M");
+        commands.push(`${x},${y}`);
+        // lowercase to use coordinates as relative from the last point
+        commands.push("l");
+        commands.push(`${snappedTangentBa.x},${snappedTangentBa.y}`);
+      }
 
-      commands.push("M");
-      commands.push(`${coordinates[i].x},${coordinates[i].y}`);
-      commands.push("l");
-      commands.push(`${tangentbc.x},${tangentbc.y}`);
+      if (snappedTangentBc) {
+        commands.push("M");
+        commands.push(`${x},${y}`);
+        commands.push("l");
+        commands.push(`${snappedTangentBc.x},${snappedTangentBc.y}`);
+      }
     }
     return commands.join(" ");
   }
 
   export function bezierCurve(coordinates) {
     const commands = [];
-    // Push the start of the curve
-    // Move to the first point
     commands.push("M");
     commands.push(`${coordinates[0].x},${coordinates[0].y}`);
-    // And initiate a bezier curve
-    commands.push(`C${coordinates[0].x},${coordinates[0].y}`);
     // TODO: Filter coordinates to remove duplicates
-    for (let i = 1; i < coordinates.length - 1; i++) {
-      const ba = substract(coordinates[i - 1], coordinates[i]);
-      const bc = substract(coordinates[i + 1], coordinates[i]);
-      const ac = substract(coordinates[i + 1], coordinates[i - 1]);
-      const bisectingVector = normalize(bisect(ba, bc));
-      // Let's snap it to the nearest 90deg
-
-      // Computing the z value of the cross product between
-      // ac and the bisecting vector. It's sign represents
-      // in which direction to rotate for getting the tangent
-      const z = crossZ(ac, bisectingVector);
-      let tangent;
-      if (z > 0) {
-        tangent = rotate(bisectingVector, Math.PI / 2);
-      } else if (z < 0) {
-        tangent = rotate(bisectingVector, -Math.PI / 2);
-      } else {
-        // This means AC and the bisecting vector are parallel,
-        // so the angle between ba and bc is null, picking +90deg arbitrarily
-        // TODO: Maybe account for earlier points?
-        tangent = rotate(bisectingVector, Math.PI / 2);
+    for (let i = 0; i < coordinates.length; i++) {
+      const { controlPointBa, controlPointBc, tangentBc } = coordinates[i];
+      if (controlPointBa) {
+        commands.push(`${controlPointBa.x},${controlPointBa.y}`);
+        commands.push(`${coordinates[i].x},${coordinates[i].y}`);
       }
-
-      // Now we have the direction we need the amplitude
-      // for that we can project ba and bc onto the vector
-      const tangentba = snapAngle(multiply(tangent, dot(ba, tangent) * 0.5));
-      const tangentbc = snapAngle(multiply(tangent, dot(bc, tangent) * 0.5));
-      const controlPointBa = add(tangentba, coordinates[i]);
-      const controlPointBc = add(tangentbc, coordinates[i]);
-      commands.push(`${controlPointBa.x},${controlPointBa.y}`);
-      commands.push(`${coordinates[i].x},${coordinates[i].y}`);
-
-      commands.push("C");
-      commands.push(`${controlPointBc.x},${controlPointBc.y}`);
+      if (controlPointBc) {
+        commands.push("C");
+        commands.push(`${controlPointBc.x},${controlPointBc.y}`);
+      }
     }
-
-    // End the path
-    commands.push(
-      `${coordinates[coordinates.length - 1].x},${coordinates[coordinates.length - 1].y}`
-    );
-    commands.push(
-      `${coordinates[coordinates.length - 1].x},${coordinates[coordinates.length - 1].y}`
-    );
-
     return commands.join(" ");
   }
 </script>
