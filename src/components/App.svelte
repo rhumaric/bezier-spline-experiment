@@ -1,11 +1,12 @@
 <script>
   import Vertex from "./Vertex.svelte";
-  import Path, {
+  import {
+    straightLines,
     bisectingVector,
-    bezierTangents,
-    bezierCurve,
+    tangents,
+    bezierCurves,
     snappedTangents
-  } from "./Path.svelte";
+  } from "../lib/toD";
   import toBezier from "../lib/toBezier";
 
   let width = window.innerWidth,
@@ -50,25 +51,51 @@
     width: 100%;
     height: 100%;
   }
+
+  path {
+    stroke: white;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  path:not(.curve) {
+    opacity: 0.65;
+  }
 </style>
 
 <main>
   {#if width && height}
     <svg {width} {height} viewBox="0 0 {width} {height}">
-      <Path {coordinates} strokeDasharray="8 4" />
-      <Path
-        coordinates={bezierData}
-        d={bisectingVector}
-        strokeDasharray={'8 4 2 4'} />
-      <Path
-        coordinates={bezierData}
-        d={bezierTangents}
-        strokeDasharray={'16 4 2 4'} />
-      <Path
-        coordinates={bezierData}
-        d={snappedTangents}
-        strokeDasharray={'16 4 8 4 2 4'} />
-      <Path coordinates={bezierData} d={bezierCurve} opacity="1" />
+      <path
+        d={straightLines(bezierData)}
+        stroke-dasharray="8 4"
+        fill="none"
+        stroke="black"
+        stroke-width="2" />
+      <path
+        d={bisectingVector(bezierData)}
+        stroke-dasharray={'8 4 2 4'}
+        fill="none"
+        stroke="black"
+        stroke-width="2" />
+      <path
+        d={tangents(bezierData)}
+        stroke-dasharray={'16 4 2 4'}
+        fill="none"
+        stroke="black"
+        stroke-width="2" />
+      <path
+        d={snappedTangents(bezierData)}
+        stroke-dasharray={'24 4 2 4'}
+        fill="none"
+        stroke="black"
+        stroke-width="2" />
+      <path
+        class="curve"
+        d={bezierCurves(bezierData)}
+        fill="none"
+        stroke="black"
+        stroke-width="2" />
       {#each coordinates as coordinate, i (i)}
         <Vertex
           coordinates={coordinate}
