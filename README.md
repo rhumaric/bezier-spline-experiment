@@ -3,7 +3,7 @@ Bezier spline experiment
 
 Experiment for drawing a spline made of cubic bezier curves that goes through a given set of points.
 
-[Demo](public)
+[Demo](https://rhumaric.github.io/bezier-spline-experiment/public/)
 
 ## TODO
 - First and last point control points
